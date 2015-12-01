@@ -21,8 +21,22 @@ default["haproxy"]["packages"] = %w(
   haproxy
 )
 
-default["haproxy"]["zypper"]["enabled"] = true
-default["haproxy"]["zypper"]["alias"] = "server-http"
-default["haproxy"]["zypper"]["title"] = "Server HTTP"
-default["haproxy"]["zypper"]["repo"] = "http://download.opensuse.org/repositories/server:/http/openSUSE_#{node["platform_version"]}/"
-default["haproxy"]["zypper"]["key"] = "#{node["haproxy"]["zypper"]["repo"]}repodata/repomd.xml.key"
+case node["platform_family"]
+when "suse"
+  repo = case node["platform_version"]
+  when /\A13\.\d+\z/
+    "openSUSE_#{node["platform_version"]}"
+  when /\A42\.\d+\z/
+    "openSUSE_Leap_#{node["platform_version"]}"
+  when /\A\d{8}\z/
+    "openSUSE_Tumbleweed"
+  else
+    raise "Unsupported SUSE version"
+  end
+
+  default["haproxy"]["zypper"]["enabled"] = true
+  default["haproxy"]["zypper"]["alias"] = "server-http"
+  default["haproxy"]["zypper"]["title"] = "Server HTTP"
+  default["haproxy"]["zypper"]["repo"] = "http://download.opensuse.org/repositories/server:/http/#{repo}/"
+  default["haproxy"]["zypper"]["key"] = "#{node["haproxy"]["zypper"]["repo"]}repodata/repomd.xml.key"
+end
